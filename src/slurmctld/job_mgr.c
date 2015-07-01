@@ -8189,6 +8189,50 @@ int update_job(job_desc_msg_t * job_specs, uid_t uid)
 		     job_ptr->wait4switch, job_specs->job_id);
 	}
 
+	if (job_specs->qos) {
+
+		if (!authorized && !IS_JOB_PENDING(job_ptr))
+			error_code = ESLURM_DISABLED;
+		else {
+			slurmdb_qos_rec_t qos_rec;
+			slurmdb_qos_rec_t *new_qos_ptr;
+			char *resv_name;
+
+			if (job_specs->reservation
+			    && job_specs->reservation[0] != '\0')
+				resv_name = job_specs->reservation;
+			else
+				resv_name = job_ptr->resv_name;
+
+			memset(&qos_rec, 0, sizeof(slurmdb_qos_rec_t));
+			qos_rec.name = job_specs->qos;
+
+			new_qos_ptr = _determine_and_validate_qos(
+				resv_name, job_ptr->assoc_ptr,
+				authorized, &qos_rec, &error_code);
+			if (error_code == SLURM_SUCCESS) {
+				info("update_job: setting qos to %s "
+				     "for job_id %u",
+				     job_specs->qos, job_specs->job_id);
+				if (job_ptr->qos_id != qos_rec.id) {
+					job_ptr->qos_id = qos_rec.id;
+					job_ptr->qos_ptr = new_qos_ptr;
+					if (authorized)
+						job_ptr->limit_set_qos =
+							ADMIN_SET_LIMIT;
+					else
+						job_ptr->limit_set_qos = 0;
+					update_accounting = true;
+				} else
+					debug("sched: update_job: new qos "
+					      "identical to old qos %u",
+					      job_ptr->job_id);
+			}
+		}
+	}
+	if (error_code != SLURM_SUCCESS)
+		goto fini;
+
 	if (job_specs->partition
 	    && !xstrcmp(job_specs->partition, job_ptr->partition)) {
 		debug("sched: update_job: new partition identical to "
@@ -8356,50 +8400,6 @@ int update_job(job_desc_msg_t * job_specs, uid_t uid)
 		}
 	}
 
-	if (error_code != SLURM_SUCCESS)
-		goto fini;
-
-	if (job_specs->qos) {
-
-		if (!authorized && !IS_JOB_PENDING(job_ptr))
-			error_code = ESLURM_DISABLED;
-		else {
-			slurmdb_qos_rec_t qos_rec;
-			slurmdb_qos_rec_t *new_qos_ptr;
-			char *resv_name;
-
-			if (job_specs->reservation
-			    && job_specs->reservation[0] != '\0')
-				resv_name = job_specs->reservation;
-			else
-				resv_name = job_ptr->resv_name;
-
-			memset(&qos_rec, 0, sizeof(slurmdb_qos_rec_t));
-			qos_rec.name = job_specs->qos;
-
-			new_qos_ptr = _determine_and_validate_qos(
-				resv_name, job_ptr->assoc_ptr,
-				authorized, &qos_rec, &error_code);
-			if (error_code == SLURM_SUCCESS) {
-				info("update_job: setting qos to %s "
-				     "for job_id %u",
-				     job_specs->qos, job_specs->job_id);
-				if (job_ptr->qos_id != qos_rec.id) {
-					job_ptr->qos_id = qos_rec.id;
-					job_ptr->qos_ptr = new_qos_ptr;
-					if (authorized)
-						job_ptr->limit_set_qos =
-							ADMIN_SET_LIMIT;
-					else
-						job_ptr->limit_set_qos = 0;
-					update_accounting = true;
-				} else
-					debug("sched: update_job: new qos "
-					      "identical to old qos %u",
-					      job_ptr->job_id);
-			}
-		}
-	}
 	if (error_code != SLURM_SUCCESS)
 		goto fini;
 
