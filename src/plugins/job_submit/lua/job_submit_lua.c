@@ -252,7 +252,7 @@ static char *_get_default_qos(uint32_t user_id, char *account, char *partition)
 	} else {
 		assoc.acct = _get_default_account(user_id);
 	}
-	if (assoc_mgr_fill_in_assoc(acct_db_conn, &assoc, 0,
+	if (assoc_mgr_fill_in_assoc(acct_db_conn, &assoc, accounting_enforce,
 				    &assoc_ptr, false) != SLURM_ERROR) {
 		qos_id = assoc_ptr->def_qos_id;
 	} else {
