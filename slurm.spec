@@ -85,15 +85,15 @@
 %slurm_with_opt sgijob
 %endif
 
-Name:    see META file
-Version: see META file
-Release: see META file
+Name:    slurm
+Version: 15.08.6
+Release: 2%{?dist}
 
 Summary: Slurm Workload Manager
 
 License: GPL
 Group: System Environment/Base
-Source: %{name}-%{version}-%{release}.tgz
+Source: %{name}-%{version}.tar.bz2
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}
 URL: http://slurm.schedmd.com/
 
@@ -101,6 +101,7 @@ Requires: slurm-plugins
 
 %ifos linux
 BuildRequires: python
+BuildRequires: libtool
 %endif
 
 %ifos solaris
@@ -425,9 +426,10 @@ Gives the ability for Slurm to use Berkeley Lab Checkpoint/Restart
 #############################################################################
 
 %prep
-%setup -n %{name}-%{version}-%{release}
+%setup -n %{name}-%{version}
 
 %build
+./autogen.sh
 %configure \
 	%{!?slurm_with_debug:--disable-debug} \
 	%{?slurm_with_partial_attach:--enable-partial-attach} \
@@ -934,6 +936,7 @@ rm -rf $RPM_BUILD_ROOT
 %{_libdir}/slurm/job_submit_all_partitions.so
 %{_libdir}/slurm/job_submit_cray.so
 %{_libdir}/slurm/job_submit_require_timelimit.so
+%{_libdir}/slurm/job_submit_save_script.so
 %{_libdir}/slurm/job_submit_throttle.so
 %{_libdir}/slurm/jobacct_gather_aix.so
 %{_libdir}/slurm/jobacct_gather_cgroup.so

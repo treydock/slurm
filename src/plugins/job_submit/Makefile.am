@@ -10,4 +10,5 @@ SUBDIRS = \
 	partition \
 	pbs \
 	require_timelimit \
+	save_script \
 	throttle
