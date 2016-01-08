@@ -3,6 +3,7 @@
 SUBDIRS = \
 	all_partitions \
 	defaults \
+	gres_env \
 	logging \
 	lua \
 	partition \

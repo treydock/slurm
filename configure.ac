@@ -454,6 +454,7 @@ AC_CONFIG_FILES([Makefile
 		 src/plugins/cli_filter/lua/Makefile
 		 src/plugins/cli_filter/syslog/Makefile
 		 src/plugins/cli_filter/user_defaults/Makefile
+		 src/plugins/cli_filter/gres_env/Makefile
 		 src/plugins/cred/Makefile
 		 src/plugins/cred/common/Makefile
 		 src/plugins/cred/munge/Makefile
@@ -486,6 +487,7 @@ AC_CONFIG_FILES([Makefile
 		 src/plugins/job_submit/Makefile
 		 src/plugins/job_submit/all_partitions/Makefile
 		 src/plugins/job_submit/defaults/Makefile
+		 src/plugins/job_submit/gres_env/Makefile
 		 src/plugins/job_submit/logging/Makefile
 		 src/plugins/job_submit/lua/Makefile
 		 src/plugins/job_submit/partition/Makefile

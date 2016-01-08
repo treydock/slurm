@@ -466,7 +466,7 @@ target_vendor = @target_vendor@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUBDIRS = common lua syslog user_defaults
+SUBDIRS = common lua syslog user_defaults gres_env
 all: all-recursive
 
 .SUFFIXES:
