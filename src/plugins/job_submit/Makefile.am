@@ -4,6 +4,7 @@ SUBDIRS = \
 	all_partitions \
 	cray_aries \
 	defaults \
+	gres_env \
 	logging \
 	lua \
 	partition \
