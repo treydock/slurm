@@ -40,6 +40,8 @@
 #include <arpa/nameser.h>
 #include <netinet/in.h>
 #include <resolv.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "src/common/list.h"
 #include "src/common/slurm_protocol_api.h"
@@ -59,6 +61,7 @@ static int _sort_controllers(void *x, void *y)
 
 extern List resolve_ctls_from_dns_srv(void)
 {
+	const char* srv_record;
 	struct __res_state res;
 	ns_msg handle;
 	ns_rr rr;
@@ -71,7 +74,13 @@ extern List resolve_ctls_from_dns_srv(void)
 		return NULL;
 	}
 
-	if ((len = res_nsearch(&res, SRV_RECORD, C_IN, T_SRV,
+	if (getenv("SLURM_SRV_RECORD")) {
+		srv_record = getenv("SLURM_SRV_RECORD");
+	} else {
+		srv_record = SRV_RECORD;
+	}
+
+	if ((len = res_nsearch(&res, srv_record, C_IN, T_SRV,
 			       answer, sizeof(answer))) < 0) {
 		error("%s: res_nsearch error: %m", __func__);
 		return NULL;
