@@ -9,7 +9,7 @@
 
 #include <stdio.h>
 
-const char plugin_name[]="Save script jobsubmit plugin";
+const char plugin_name[]="gres_env jobsubmit plugin";
 const char plugin_type[]="job_submit/gres_env";
 const uint32_t plugin_version   = SLURM_VERSION_NUMBER;
 
