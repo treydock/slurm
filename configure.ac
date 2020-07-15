@@ -501,6 +501,7 @@ AC_CONFIG_FILES([Makefile
 		 src/plugins/cli_filter/none/Makefile
 		 src/plugins/cli_filter/syslog/Makefile
 		 src/plugins/cli_filter/user_defaults/Makefile
+		 src/plugins/cli_filter/gres_env/Makefile
 		 src/plugins/core_spec/Makefile
 		 src/plugins/core_spec/cray_aries/Makefile
 		 src/plugins/core_spec/none/Makefile
