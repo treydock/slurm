@@ -50,7 +50,7 @@ use autouse 'Pod::Usage' => qw(pod2usage);
 my $srun = "${FindBin::Bin}/srun";
 
 my ($nprocs, $hostname, $verbose, $nostdin, $allstdin, $nostdout, $pernode,
-    $perif, $no_shem, $gige, $kill_it, $tv, $config_file, $timeout,
+    $ppn, $perif, $no_shem, $gige, $kill_it, $tv, $config_file, $timeout,
     $help, $man);
 
 sub get_new_config() {
@@ -96,6 +96,7 @@ GetOptions('n=i'      => \$nprocs,
 	   'nostdout' => \$nostdout,
 	   'pernode'  => \$pernode,
 	   'perif'    => \$perif, # n/a
+	   'ppn=i'    => \$ppn,
 	   'no-shmem' => \$no_shem, # n/a
 	   'gige'     => \$gige, # n/a
 	   'kill'     => \$kill_it, # n/a
@@ -129,6 +130,12 @@ if(!$ARGV[0] && !$config_file) {
 
 my $new_config;
 
+if ( $pernode ) {
+    $ppn = 1;
+}
+if ( $ppn and ! $nprocs ) {
+    $nprocs = int($ppn)*int($ENV{'SLURM_NNODES'});
+}
 
 my @command = ("$srun");
 
@@ -137,6 +144,7 @@ push @command, "-o job.o\%j -e job.e\%j" if $nostdout;
 push @command, "-inone" if $nostdin;
 push @command, "-i0" if !$allstdin; #default only send stdin to first node
 push @command, "-n$nprocs" if $nprocs; # number of tasks
+push @command, "--ntasks-per-node=$ppn" if $ppn; #procs per node
 push @command, "-w$hostname" if $hostname; # Hostlist provided
 push @command, "-t '" . $ENV{"MPIEXEC_TIMEOUT"} . "'" if $ENV{"MPIEXEC_TIMEOUT"};
 
@@ -189,6 +197,7 @@ mpiexec.slurm supports the following options:
          [-allstdin]
          [-nostdout]
          [-pernode]
+         [-ppn procspernode]
          [-config config_file]
          [-help|-?]
          [-man]
@@ -240,6 +249,10 @@ Allocate only one process per compute node. For SMP nodes, only one processor
 will be allocated a job. This flag is used to implement multiple level
 parallelism with MPI between nodes, and threads within a node, assmuming the
 code is set up to do that.
+
+=item B<-ppn N>
+
+Allocate only N processes per compute node.
 
 =item B<-config <config_file>>
 
