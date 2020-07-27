@@ -68,6 +68,7 @@ my ($start_time,
     @pe_ev_opts,
     $priority,
     $requeue,
+    $shell,
     $destination,
     $sbatchline,
     $variable_list,
@@ -102,8 +103,7 @@ GetOptions('a=s'      => \$start_time,
 	   'P=s'      => \$wckey,
 	   'q=s'      => \$destination,
 	   'r=s'      => \$requeue,
-	   'S=s'      => sub { warn "option -S is ignored, " .
-				    "specify shell via #!<shell> in the job script\n" },
+	   'S=s'      => \$shell,
 	   't=s'      => \$array,
 	   'v=s'      => \$variable_list,
 	   'V'        => \$export_env,
@@ -389,9 +389,22 @@ if ($sbatchline) {
 # that if interactive mode was requested, the standard output and standard
 # error are _not_ captured.
 if ($interactive) {
+        if ( ! $shell ) {
+	        if ( $ENV{'SHELL'} ) {
+		        $shell = $ENV{'SHELL'};
+		} else {
+		        $shell = "/bin/sh";
+		}
+	}
+	$command .= " $srun --pty $shell";
 	my $ret = system($command);
 	exit ($ret >> 8);
 } else {
+        # complain if -S is set
+        if ( $shell ) {
+	    warn "option -S is ignored, " .
+		"specify shell via #!<shell> in the job script\n";
+	}
 	# Capture stderr from the command to the stdout stream.
 	$command .= ' 2>&1';
 
