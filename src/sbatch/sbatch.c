@@ -944,12 +944,6 @@ static void *_get_script_buffer(const char *filename, int *size)
 	} else if (xstring_is_whitespace(buf)) {
 		error("Batch script contains only whitespace!");
 		goto fail;
-	} else if (!has_shebang(buf, script_size)) {
-		error("This does not look like a batch script.  The first");
-		error("line must start with #! followed by the path"
-		      " to an interpreter.");
-		error("For instance: #!/bin/sh");
-		goto fail;
 	} else if (contains_null_char(buf, script_size)) {
 		error("The Slurm controller does not allow scripts that");
 		error("contain a NULL character '\\0'.");
