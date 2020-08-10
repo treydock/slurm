@@ -251,26 +251,16 @@ if($interactive) {
 		if ($err_path) {
 			$command .= " -e $err_path";
 		} else {
-			if ($job_name) {
-				$command .= " -e $job_name.e%A";
-			} else {
-				$command .= " -e $use_job_name.e%A";
-			}
-
-			$command .= ".%a" if $array;
+		        $ENV{'SBATCH_ERROR_FILE'} = "%x.e%A";
+		        $ENV{'SBATCH_ERROR_FILE'}.= "-%a" if $array;
 		}
 	}
 
 	if ($out_path) {
 		$command .= " -o $out_path";
 	} else {
-		if ($job_name) {
-			$command .= " -o $job_name.o%A";
-		} else {
-			$command .= " -o $use_job_name.o%A";
-		}
-
-		$command .= ".%a" if $array;
+	        $ENV{'SBATCH_OUTPUT_FILE'} = "%x.o%A";
+		$ENV{'SBATCH_OUTPUT_FILE'}.= "-%a" if $array;
 	}
 
 #	The job size specification may be within the batch script,
