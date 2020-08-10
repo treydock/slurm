@@ -3400,11 +3400,10 @@ static int _fill_in_gres_fields(job_record_t *job_ptr)
 	if (!job_ptr->gres_alloc || (job_ptr->gres_alloc[0] == '\0') ) {
 		/* Now build the GRES allocated field. */
 		rv = _build_gres_alloc_string(job_ptr);
+		job_ptr->gres_req = _build_tres_str(job_ptr);
 		if (slurmctld_conf.debug_flags & DEBUG_FLAG_GRES) {
-			char *tmp = _build_tres_str(job_ptr);
 			info("%s %pJ gres_req:%s gres_alloc:%s",
-			     __func__, job_ptr, tmp, job_ptr->gres_alloc);
-			xfree(tmp);
+			     __func__, job_ptr, job_ptr->gres_req, job_ptr->gres_alloc);
 		}
 	}
 
