@@ -386,6 +386,12 @@ if ($sbatchline) {
 	exit;
 }
 
+$ENV{PBS_QSUB_WRAPPER} = "1";
+my $log_msg = "user=$ENV{USER}";
+open(my $log_fh, "| logger -t qsub-wrapper");
+print $log_fh $log_msg . "\n";
+close($log_fh);
+
 # Execute the command and capture its stdout, stderr, and exit status. Note
 # that if interactive mode was requested, the standard output and standard
 # error are _not_ captured.
