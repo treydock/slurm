@@ -250,10 +250,13 @@ if($interactive) {
 	if (!$join_output) {
 		if ($err_path) {
 			$command .= " -e $err_path";
-		} else {
-		        $ENV{'SBATCH_ERROR_FILE'} = "%x.e%A";
-		        $ENV{'SBATCH_ERROR_FILE'}.= "-%a" if $array;
 		}
+# NOTE:  uncomment the following block if #PBS -j oe is not a common
+# practice in PBS jobs at your site
+#        else {
+#		        $ENV{'SBATCH_ERROR_FILE'} = "%x.e%A";
+#		        $ENV{'SBATCH_ERROR_FILE'}.= "-%a" if $array;
+#		}
 	}
 
 	if ($out_path) {
