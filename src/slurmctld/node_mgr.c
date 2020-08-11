@@ -2092,7 +2092,7 @@ extern int drain_nodes(char *nodes, char *reason, uint32_t reason_uid)
 {
 	int error_code = 0, node_inx;
 	node_record_t *node_ptr;
-	char  *this_node_name ;
+	char  *this_node_name, *user_name;
 	hostlist_t host_list;
 	time_t now = time(NULL);
 
@@ -2105,6 +2105,8 @@ extern int drain_nodes(char *nodes, char *reason, uint32_t reason_uid)
 		error ("hostlist_create error on %s: %m", nodes);
 		return ESLURM_INVALID_NODE_NAME;
 	}
+
+	user_name = uid_to_string(reason_uid);
 
 	while ( (this_node_name = hostlist_shift (host_list)) ) {
 		node_ptr = find_node_record (this_node_name);
@@ -2120,13 +2122,14 @@ extern int drain_nodes(char *nodes, char *reason, uint32_t reason_uid)
 		if (IS_NODE_DRAIN(node_ptr)) {
 			/* state already changed, nothing to do */
 			free (this_node_name);
+			free (user_name);
 			continue;
 		}
 
 		node_ptr->node_state |= NODE_STATE_DRAIN;
 		bit_clear (avail_node_bitmap, node_inx);
-		info ("drain_nodes: node %s state set to DRAIN",
-			this_node_name);
+		info ("drain_nodes: node %s state set to DRAIN by %s",
+			this_node_name, user_name);
 		if ((node_ptr->reason == NULL) ||
 		    (xstrncmp(node_ptr->reason, "Not responding", 14) == 0)) {
 			xfree(node_ptr->reason);
@@ -2144,6 +2147,7 @@ extern int drain_nodes(char *nodes, char *reason, uint32_t reason_uid)
 		}
 
 		free (this_node_name);
+		free (user_name);
 	}
 	last_node_update = time (NULL);
 
