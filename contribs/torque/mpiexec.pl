@@ -90,6 +90,7 @@ sub get_new_config() {
 
 
 GetOptions('n=i'      => \$nprocs,
+	   'np=i'     => \$nprocs,
 	   'host=s'   => \$hostname,
 	   'verbose+'  => \$verbose,
 	   'nostdin'  => \$nostdin,
