@@ -89,6 +89,10 @@ int slurm_spank_task_init(spank_t sp, int ac, char **av)
 	    ESPANK_SUCCESS)
 		spank_setenv(sp, "PBS_NODENUM", val, 1);
 
+	if (spank_getenv(sp, "SLURM_NTASKS", val, sizeof(val)) ==
+            ESPANK_SUCCESS)
+	    	spank_setenv(sp, "PBS_NP", val, 1);
+
 	if (spank_getenv(sp, "HOME", val, sizeof(val)) == ESPANK_SUCCESS)
 		spank_setenv(sp, "PBS_O_HOME", val, 1);
 
