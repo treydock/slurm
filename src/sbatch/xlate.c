@@ -444,7 +444,7 @@ static void _parse_pbs_nodes_opts(char *node_opts)
 {
 	int i = 0;
 	char *temp = NULL;
-	int ppn = 0;
+	int ppn = 0, gpus = 0;
 	int node_cnt = 0;
 	hostlist_t hl = hostlist_create(NULL);
 
@@ -452,6 +452,10 @@ static void _parse_pbs_nodes_opts(char *node_opts)
 		if (!xstrncmp(node_opts+i, "ppn=", 4)) {
 			i+=4;
 			ppn += strtol(node_opts+i, NULL, 10);
+			_get_next_pbs_node_part(node_opts, &i);
+		} else if (!xstrncmp(node_opts+i, "gpus=", 5)) {
+			i+=5;
+			gpus += strtol(node_opts+i, NULL, 10);
 			_get_next_pbs_node_part(node_opts, &i);
 		} else if (isdigit(node_opts[i])) {
 			node_cnt += strtol(node_opts+i, NULL, 10);
@@ -478,6 +482,13 @@ static void _parse_pbs_nodes_opts(char *node_opts)
 		ppn *= node_cnt;
 		ntasks = xstrdup_printf("%d", ppn);
 		slurm_process_option(&opt, 'n', ntasks, false, false);
+	}
+
+	if (gpus) {
+		char *gpu_str = xstrdup_printf("gpu:%d", gpus);
+		slurm_process_option(&opt, LONG_OPT_GRES, gpu_str, false,
+				     false);
+		xfree(gpu_str);
 	}
 
 	if (hostlist_count(hl) > 0) {
