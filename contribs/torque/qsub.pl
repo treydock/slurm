@@ -236,6 +236,9 @@ if($interactive) {
 	if ($node_opts{task_cnt}) {
 		$node_opts{task_cnt} *= $node_opts{node_cnt};
 	}
+	if ($node_opts{gpu_cnt}) {
+		$node_opts{gpu_cnt} *= $node_opts{node_cnt};
+	}
 
 	if (!$node_opts{node_cnt} && !$node_opts{task_cnt} && !$node_opts{hostlist}) {
 		$node_opts{task_cnt} = 1;
@@ -275,6 +278,7 @@ if($interactive) {
 
 $command .= " -N$node_opts{node_cnt}" if $node_opts{node_cnt};
 $command .= " -n$node_opts{task_cnt}" if $node_opts{task_cnt};
+$command .= " -G$node_opts{gpu_cnt}" if $node_opts{gpu_cnt};
 $command .= " -w$node_opts{hostlist}" if $node_opts{hostlist};
 
 $command .= " -D$workdir" if $workdir;
@@ -494,7 +498,13 @@ sub parse_resource_list {
 
 	foreach my $key (@keys) {
 		#print "$rl\n";
-		($opt{$key}) = $rl =~ m/$key=([\w:\+=+]+)/;
+		if ( $key eq "nodes" && $rl =~ m/$key=/ ) {
+		        $opt{$key} = $rl;
+		        $opt{$key} =~ s/$key=//;
+		        $opt{$key} =~ s/,/:/g;
+		} else {
+		        ($opt{$key}) = $rl =~ m/$key=([\w:\+=+]+)/;
+		}
 	}
 
 	$opt{walltime} = $opt{h_rt} if ($opt{h_rt} && !$opt{walltime});
@@ -538,11 +548,15 @@ sub parse_node_opts {
 	my ($node_string) = @_;
 	my %opt = ('node_cnt' => 0,
 		   'hostlist' => "",
+		   'gpu_cnt'  => 0,
 		   'task_cnt' => 0
 		   );
 	while($node_string =~ /ppn=(\d+)/g) {
 		$opt{task_cnt} += $1;
 	}
+	while($node_string =~ /gpus=(\d+)/g) {
+	        $opt{gpu_cnt} += $1;
+        }
 
 	my $hl = Slurm::Hostlist::create("");
 
@@ -550,7 +564,7 @@ sub parse_node_opts {
 	foreach my $part (@parts) {
 		my @sub_parts = split(/:/, $part);
 		foreach my $sub_part (@sub_parts) {
-			if($sub_part =~ /ppn=(\d+)/) {
+			if($sub_part =~ /ppn=(\d+)/ || $sub_part =~ /gpus=(\d+)/) {
 				next;
 			} elsif($sub_part =~ /^(\d+)/) {
 				$opt{node_cnt} += $1;
