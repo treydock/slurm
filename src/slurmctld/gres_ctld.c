@@ -181,11 +181,6 @@ static int _job_alloc(void *job_gres_data, List job_gres_list_alloc,
 	xassert(job_gres_ptr);
 	xassert(node_gres_ptr);
 
-	if (node_gres_ptr->no_consume) {
-		job_gres_ptr->total_gres = NO_CONSUME_VAL64;
-		return SLURM_SUCCESS;
-	}
-
 	if (gres_id_shared(plugin_id)) {
 		shared_gres = true;
 		gres_per_bit = job_gres_ptr->gres_per_node;
@@ -635,6 +630,10 @@ static int _job_alloc(void *job_gres_data, List job_gres_list_alloc,
 			node_gres_ptr->type_name[j], node_cnt);
 		gres_cnt = node_gres_ptr->type_cnt_alloc[j] -
 			   pre_alloc_type_cnt[j];
+		if (node_gres_ptr->no_consume) {
+			node_gres_ptr->type_cnt_alloc[j] -= gres_cnt;
+			node_gres_ptr->gres_cnt_alloc -= gres_cnt;
+		}
 		job_alloc_gres_ptr->gres_cnt_node_alloc[node_offset] = gres_cnt;
 		job_alloc_gres_ptr->total_gres += gres_cnt;
 
@@ -661,6 +660,8 @@ static int _job_alloc(void *job_gres_data, List job_gres_list_alloc,
 			job_gres_list_alloc, plugin_id, NO_VAL,
 			gres_name, NULL, node_cnt);
 		gres_cnt = node_gres_ptr->gres_cnt_alloc - pre_alloc_gres_cnt;
+		if (node_gres_ptr->no_consume)
+			node_gres_ptr->gres_cnt_alloc -= gres_cnt;
 		job_alloc_gres_ptr->gres_cnt_node_alloc[node_offset] = gres_cnt;
 		job_alloc_gres_ptr->total_gres += gres_cnt;
 

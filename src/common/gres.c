@@ -10011,7 +10011,8 @@ extern uint64_t gres_step_test(List step_gres_list, List job_gres_list,
 				    &foreach_gres_cnt);
 
 		if (foreach_gres_cnt.gres_cnt == INFINITE64) {
-			/* job lack resources required by the step */
+			log_flag(STEPS, "%s: Job lack resources required by the step",
+				 __func__);
 			core_cnt = 0;
 			break;
 		}
