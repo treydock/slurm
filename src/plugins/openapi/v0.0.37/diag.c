@@ -50,7 +50,6 @@
 #include "src/common/xstring.h"
 
 #include "src/slurmrestd/operations.h"
-#include "src/slurmctld/licenses.h"
 
 #include "src/plugins/openapi/v0.0.37/api.h"
 
@@ -265,23 +264,18 @@ static int _op_handler_licenses(const char *context_id,
 	int rc = SLURM_SUCCESS;
 	license_info_msg_t *msg;
 	uint16_t show_flags;
-	static time_t last_update;
-	time_t prev_last_update = last_license_update;
+	static time_t last_update = 0;
 
 	show_flags = 0;
 	data_t *errors = populate_response_format(resp_ptr);
 
 	
-	last_update = time(NULL) + 2;
-	last_license_update = 0;
 	rc = slurm_load_licenses(last_update, &msg, show_flags);
 	if (rc != SLURM_SUCCESS) {
 		slurm_free_license_info_msg(msg);
 		return resp_error(errors, rc, "slurm_load_licenses",
 				  "slurmctld unable to load licenses");
     }
-
-	last_license_update = prev_last_update;
 
     data_t *licenses = data_key_set(resp_ptr, "licenses");
     data_set_list(licenses);
