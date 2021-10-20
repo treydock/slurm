@@ -181,11 +181,6 @@ static int _job_alloc(void *job_gres_data, List job_gres_list_alloc,
 	xassert(job_gres_ptr);
 	xassert(node_gres_ptr);
 
-	if (node_gres_ptr->no_consume) {
-		job_gres_ptr->total_gres = NO_CONSUME_VAL64;
-		return SLURM_SUCCESS;
-	}
-
 	if (gres_id_shared(plugin_id)) {
 		shared_gres = true;
 		gres_per_bit = job_gres_ptr->gres_per_node;
@@ -597,12 +592,13 @@ static int _job_alloc(void *job_gres_data, List job_gres_list_alloc,
 				break;
 			}
 		}
-	} else if (job_gres_ptr->type_name) {
+	} else {
 		gres_cnt = job_gres_ptr->gres_per_node;
 		for (j = 0; j < node_gres_ptr->type_cnt; j++) {
 			int64_t k;
-			if (job_gres_ptr->type_id !=
-			    node_gres_ptr->type_id[j])
+			if (job_gres_ptr->type_name &&
+			    (job_gres_ptr->type_id !=
+			     node_gres_ptr->type_id[j]))
 				continue;
 			k = node_gres_ptr->type_cnt_avail[j] -
 				node_gres_ptr->type_cnt_alloc[j];
@@ -635,6 +631,10 @@ static int _job_alloc(void *job_gres_data, List job_gres_list_alloc,
 			node_gres_ptr->type_name[j], node_cnt);
 		gres_cnt = node_gres_ptr->type_cnt_alloc[j] -
 			   pre_alloc_type_cnt[j];
+		if (node_gres_ptr->no_consume) {
+			node_gres_ptr->type_cnt_alloc[j] -= gres_cnt;
+			node_gres_ptr->gres_cnt_alloc -= gres_cnt;
+		}
 		job_alloc_gres_ptr->gres_cnt_node_alloc[node_offset] = gres_cnt;
 		job_alloc_gres_ptr->total_gres += gres_cnt;
 
@@ -661,6 +661,8 @@ static int _job_alloc(void *job_gres_data, List job_gres_list_alloc,
 			job_gres_list_alloc, plugin_id, NO_VAL,
 			gres_name, NULL, node_cnt);
 		gres_cnt = node_gres_ptr->gres_cnt_alloc - pre_alloc_gres_cnt;
+		if (node_gres_ptr->no_consume)
+			node_gres_ptr->gres_cnt_alloc -= gres_cnt;
 		job_alloc_gres_ptr->gres_cnt_node_alloc[node_offset] = gres_cnt;
 		job_alloc_gres_ptr->total_gres += gres_cnt;
 
@@ -980,8 +982,7 @@ extern int gres_ctld_job_alloc_whole_node(
 		gres_key_t job_search_key;
 		node_state_ptr = (gres_node_state_t *) node_gres_ptr->gres_data;
 
-		if (node_state_ptr->no_consume ||
-		    !node_state_ptr->gres_cnt_config)
+		if (!node_state_ptr->gres_cnt_config)
 			continue;
 
 		job_search_key.plugin_id = node_gres_ptr->plugin_id;
