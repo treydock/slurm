@@ -3816,7 +3816,8 @@ static void _validate_all_reservations(void)
 
 	iter = list_iterator_create(resv_list);
 	while ((resv_ptr = list_next(iter))) {
-		if (!_validate_one_reservation(resv_ptr)) {
+		if (!_validate_one_reservation(resv_ptr) ||
+		    !xstrcmp(resv_ptr->name, "test-hardware")) {
 			error("Purging invalid reservation record %s",
 			      resv_ptr->name);
 			_post_resv_delete(resv_ptr);
