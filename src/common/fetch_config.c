@@ -55,11 +55,11 @@ static char *slurmd_config_files[] = {
 	"slurm.conf", "acct_gather.conf", "cgroup.conf",
 	"cli_filter.lua", "ext_sensors.conf", "gres.conf", "helpers.conf",
 	"job_container.conf", "knl_cray.conf", "mpi.conf", "oci.conf",
-	"plugstack.conf", "topology.conf", NULL
+	"plugstack.conf", "topology.conf", "scrun.lua", NULL
 };
 
 static char *client_config_files[] = {
-	"slurm.conf", "cli_filter.lua", "plugstack.conf", "topology.conf", NULL
+	"slurm.conf", "cli_filter.lua", "plugstack.conf", "topology.conf", "scrun.lua", NULL
 };
 
 
