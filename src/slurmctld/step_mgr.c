@@ -6016,6 +6016,11 @@ static int _build_ext_launcher_step(step_record_t **step_rec,
 	if (!step_rec)
 		return SLURM_ERROR;
 
+	if (job_ptr->next_step_id >= slurm_conf.max_step_cnt) {
+		error("%s: %pJ step limit reached",
+		      __func__, job_ptr);
+		return ESLURM_STEP_LIMIT;
+	}
 	step_ptr = *step_rec = _create_step_record(job_ptr, protocol_version);
 
 	if (!step_ptr) {
@@ -6024,8 +6029,6 @@ static int _build_ext_launcher_step(step_record_t **step_rec,
 		return SLURM_ERROR;
 	}
 
-	if (job_ptr->next_step_id >= slurm_conf.max_step_cnt)
-		return SLURM_ERROR;
 
 	/* Reset some fields we're going to ignore in _pick_step_nodes. */
 	step_specs->flags = SSF_EXT_LAUNCHER;
@@ -6083,6 +6086,7 @@ static int _build_ext_launcher_step(step_record_t **step_rec,
 
 	if (!step_ptr->step_layout) {
 		select_g_select_jobinfo_free(select_jobinfo);
+		delete_step_record(job_ptr, step_ptr);
 		return SLURM_ERROR;
 	}
 
